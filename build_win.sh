@@ -39,6 +39,14 @@ do_cmd()
 
 # do_cmd "which $CC"
 
+precompile_system_header()
+{
+	FILENAME="${1}_${MODULE_ID}"
+	((count=count+1))
+	printf "[$count/$total_count] ${COLOR}$1$RESET\n"
+	do_cmd "$CC -x c++-system-header -MT $OUTPUT_DIR/$FILENAME.pcm -MMD -MP -MF $OUTPUT_DIR/$FILENAME.d $CXX_FLAGS --precompile -o $OUTPUT_DIR/$FILENAME.pcm -c $1"
+}
+
 precompile_module()
 {
 	IN_MODULES=
@@ -92,6 +100,8 @@ sleep 2
 # Precompile Phase
 
 # System Header-units
+# precompile_system_header "iostream"
+
 # Local Header-units
 # Modules
 precompile_module "Hello.cc"
