@@ -84,7 +84,7 @@ sleep 2
 # Local Header-units
 # Modules
 precompile_module "Hello.cc"
-precompile_module "Main.cc" "Hello" "c++"
+# precompile_module "Main.cc" "Hello" "c++"
 
 # Compile Phase
 compile_module "Hello.cc"
@@ -96,8 +96,8 @@ compile_module "Main.cc" "Hello" "c++"
 
 # Link
 ((count=count+1))
-printf "[$count/$total_count] ${COLOR}Linking $OUTPUT_DIR/modules-test$RESET\n"
-do_cmd "$CC -o $OUTPUT_DIR/modules-test $OUTPUT_DIR/Hello.cc.o $OUTPUT_DIR/Main.cc.o"
+printf "[$count/$total_count] ${COLOR}Linking $OUTPUT_DIR/modules-test.exe$RESET\n"
+do_cmd "$CC -o $OUTPUT_DIR/modules-test.exe $OUTPUT_DIR/Hello.cc.o $OUTPUT_DIR/Main.cc.o"
 
 printf "\n"
 
