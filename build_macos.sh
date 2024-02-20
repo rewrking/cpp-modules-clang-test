@@ -7,7 +7,7 @@
 
 CC="clang++"
 
-CXX_FLAGS="-std=c++20 -O3 -Wall -Wextra -Wpedantic -fdiagnostics-color=always -Isrc"
+CXX_FLAGS="-std=c++20 -O3 -Wall -Wextra -Wpedantic -fdiagnostics-color=always -fmodules-ts -Isrc"
 
 OUTPUT_DIR="build"
 MODULE_ID="e545ab910d1ddd09"
@@ -40,17 +40,43 @@ do_cmd "which $CC"
 precompile_module()
 {
 	IN_MODULES=
-	for mod in "$2";
-	do
-		IN_MODULES+="-fmodule-file=$mod=$mod.cc.pcm "
-	done
+	if [[ "$2" != '' ]]; then
+		for mod in $2; do
+			IN_MODULES+="-fmodule-file=$mod=$OUTPUT_DIR/$mod.cc.pcm "
+		done
+	fi
 	((count=count+1))
 	printf "[$count/$total_count] ${COLOR}src/$1$RESET\n"
-	do_cmd "$CC -x c++ -MT $OUTPUT_DIR/$1.pcm -MMD -MP -MF $OUTPUT_DIR/$1.d $CXX_FLAGS --precompile $IN_MODULES -o $OUTPUT_DIR/$1.pcm -c src/$1"
-	# do_cmd "$CC -x c++ $CXX_FLAGS -o $OUTPUT_DIR/$1.o -c src/$1"
+	do_cmd "$CC -x c++-module -MT $OUTPUT_DIR/$1.pcm -MMD -MP -MF $OUTPUT_DIR/$1.pcm.d $CXX_FLAGS --precompile $IN_MODULES -o $OUTPUT_DIR/$1.pcm -c src/$1"
 }
 
-$CC --version | grep -i "$CC"
+compile_module()
+{
+	IN_MODULES=
+	if [[ "$2" != '' ]]; then
+		for mod in $2; do
+			IN_MODULES+="-fmodule-file=$mod=$OUTPUT_DIR/$mod.cc.pcm "
+		done
+	fi
+	((count=count+1))
+	printf "[$count/$total_count] ${COLOR}src/$1$RESET\n"
+	do_cmd "$CC -x c++-module -MT $OUTPUT_DIR/$1.o -MMD -MP -MF $OUTPUT_DIR/$1.d $CXX_FLAGS $IN_MODULES -o $OUTPUT_DIR/$1.o -c src/$1"
+}
+
+compile_main_module()
+{
+	IN_MODULES=
+	if [[ "$2" != '' ]]; then
+		for mod in $2; do
+			IN_MODULES+="-fmodule-file=$mod=$OUTPUT_DIR/$mod.cc.pcm "
+		done
+	fi
+	((count=count+1))
+	printf "[$count/$total_count] ${COLOR}src/$1$RESET\n"
+	do_cmd "$CC -x c++ -MT $OUTPUT_DIR/$1.o -MMD -MP -MF $OUTPUT_DIR/$1.d $CXX_FLAGS $IN_MODULES -o $OUTPUT_DIR/$1.o -c src/$1"
+}
+
+$CC --version
 
 rm -rf $OUTPUT_DIR
 mkdir $OUTPUT_DIR
@@ -66,20 +92,21 @@ sleep 2
 # Local Header-units
 # flags_header_unit "header.hpp"
 # Modules
-# flags_module_unit "test-impl.cpp"
 precompile_module "Hello.cc"
-precompile_module "Main.cc" "Hello"
+# precompile_module "Main.cc" "Hello" "c++"
+
+# Compile Phase
+compile_module "Hello.cc"
 
 # Root
-# precompile_module "main.cc"
-# flags_module_unit "main.cpp"
+compile_main_module "Main.cc" "Hello"
 
 # do_cmd "$CC -std=c++20 src/Main.cc -fmodule-file=Hello=Hello.pcm $(find $OUTPUT_DIR -type f -name '*.pcm') -o $OUTPUT_DIR/modules-test"
 
 # Link
 ((count=count+1))
 printf "[$count/$total_count] ${COLOR}Linking $OUTPUT_DIR/modules-test$RESET\n"
-do_cmd "$CC -o $OUTPUT_DIR/modules-test $(find $OUTPUT_DIR -type f -name '*.pcm')"
+do_cmd "$CC -o $OUTPUT_DIR/modules-test $(find $OUTPUT_DIR -type f -name '*.o')"
 
 printf "\n"
 
