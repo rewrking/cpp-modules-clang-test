@@ -1,3 +1,3 @@
-# cpp-modules-gcc-test
+# cpp-modules-clang-test
 
-C++20 Modules build exploration in GCC 11+
+C++20 Modules build exploration in Clang
