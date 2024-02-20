@@ -15,6 +15,9 @@
 			"label": "echo",
 			"type": "shell",
 			"command": "./build_macos.sh",
+			"windows": {
+				"command": "./build_win.sh"
+			},
 			"group":{
 				"kind": "build",
 				"isDefault": true
